@@ -1,0 +1,226 @@
+---
+title: "Problem Set 5"
+author: "Ethan Witkowski"
+date: "Spring 2019"
+output: 
+  github_document:
+    html_preview: true
+    pandoc_args: --webtex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<br>
+<br>
+
+#### 2a)
+
+```{r}
+homeprices <- read.csv("homeprices.csv")
+
+# define variables
+price <- homeprices[,"price"]
+sqft <- homeprices[,"sqft"]
+NE <- homeprices[,"NE"]
+
+plot(price~sqft, col=NE+1)
+#NE are light blue
+
+# Linear model homes in NE and not in NE
+fit1 <- abline(lm(price~sqft, subset=(NE==1)), col=1)
+fit2 <- abline(lm(price~sqft, subset=(NE==0)), col=2)
+```
+
+
+The regression lines would have different slopes if NE and sqft had an interaction.
+
+I do see evidence for an interaction, as the regression lines have different slopes.
+<br>
+<br>
+
+#### 2b)
+
+```{r}
+fit3 <- lm(price ~ sqft + NE)
+summary(fit3)
+
+```
+
+There is no evidence for a statistically significant interaction term, as the p-value for NE is .361.
+<br>
+<br>
+
+#### 2c)
+
+Yes, there is an outlier home with 3750 square feet.
+<br>
+<br>
+
+#### 2d)
+
+```{r}
+homeprices <- homeprices[-79,]
+
+# re-define variables
+price <- homeprices[,"price"]
+sqft <- homeprices[,"sqft"]
+NE <- homeprices[,"NE"]
+
+plot(price~sqft, col=NE+1)
+
+# Linear model homes in NE and not in NE
+fit1 <- abline(lm(price~sqft, subset=(NE==1)), col=1)
+fit2 <- abline(lm(price~sqft, subset=(NE==0)), col=2)
+
+fit3 <- lm(price ~ sqft + NE)
+summary(fit3)
+```
+
+The slopes of the NE and non-NE regression lines are much closer.
+
+The $\beta$ estimate of the NE interaction term is closer to 0 (now negative), and the p-value is much larger (.80).
+<br>
+<br>
+
+#### 3a)
+
+```{r}
+congress <- read.csv("senate.csv")
+
+# define variables
+name <- congress[,"name"]
+state <- congress[,"state"]
+party <- congress[,"party"]
+votes <- congress[,4:660]
+```
+<br>
+<br>
+
+#### 3b)
+
+```{r}
+pca <- prcomp(votes, center=T, scale=T)
+PCscores <- pca$x
+# set up plot with no points
+plot(PCscores[,1], PCscores[,2], type="n")
+# plot the names
+text(PCscores[,1], PCscores[,2], label=name, cex=.4)
+```
+<br>
+<br>
+
+#### 3c)
+
+```{r}
+partycolor <- rep(NA, nrow(congress))
+partycolor[party=="D"] <- "blue"
+partycolor[party=="R"] <- "red"
+
+pca <- prcomp(votes, center=T, scale=T)
+PCscores <- pca$x
+# set up plot with no points
+plot(PCscores[,1], PCscores[,2], type="n")
+# plot the names
+text(PCscores[,1], PCscores[,2], label=name, cex=.4, col = partycolor)
+```
+
+The first principal compenent appears to represent the issue of immigration - as those on the left of the window oppose more immigration, while those on the right of the window support more immigration.
+<br>
+<br>
+
+#### 3d)
+
+These congresspeople are outliers because they only served partial terms.
+<br>
+<br>
+
+#### 3e)
+
+```{r}
+congress <- congress[-c(42,43,44,53,54,63,64,65),]
+
+name <- congress[,"name"]
+state <- congress[,"state"]
+party <- congress[,"party"]
+votes <- congress[,4:660]
+
+partycolor <- rep(NA, nrow(congress))
+partycolor[party=="D"] <- "blue"
+partycolor[party=="R"] <- "red"
+```
+
+The error occurs when attempting to perform the PCA because certain votes have 0 variance (all congresspeople voted the same way) -- this is likely a result from a vote like "March 6th is National Tree Day," where all the congresspeople would vote the same way.
+<br>
+<br>
+
+#### 3f)
+
+```{r}
+#Find votes with 0 variance
+#sort(apply(congress, 2, sd),
+#      decreasing=T)
+
+#Removing votes with 0 variance
+congress <- congress[,-c(19,55,73,136,152,168,208,348,354,369,378,531,532,533,575)]
+
+# define variables
+name <- congress[,"name"]
+state <- congress[,"state"]
+party <- congress[,"party"]
+votes <- congress[,4:645]
+
+partycolor <- rep(NA, nrow(congress))
+partycolor[party=="D"] <- "blue"
+partycolor[party=="R"] <- "red"
+
+#Run PCA without 0 variance columns/votes
+pca <- prcomp(votes, center=T, scale=T)
+PCscores <- pca$x
+# set up plot with no points
+plot(PCscores[,1], PCscores[,2], type="n")
+# plot the names
+text(PCscores[,1], PCscores[,2], label=name, cex=.4, col = partycolor)
+```
+<br>
+<br>
+
+#### 3g)
+
+```{r}
+summary(pca)
+```
+
+The first PCA accounts for 58.07% of the variance.
+
+The second PCA accounts for 3.66% of variance by itself, 69.93% in cumulative with PCA1.
+
+36 PC's are necessary to account for 90% of the variance in the dataset.
+<br>
+<br>
+
+#### 3h)
+
+The first PC appears to represent if the congress person supports pro-choice.
+
+The second PC appears to represent voting on national debt, as there are many tea party members on the bottom left of the graph.
+
+Murkowski and Collins are outliers, as they are moderate republicans as opposed to the more staunch republicans; for example, they are both pro-choice.
+<br>
+<br>
+
+#### 3i)
+
+Yes, King and Sanders, and they more closely resemble democrats.
+<br>
+<br>
+
+#### 3j)
+
+The democrats are more coherent in their voting.
+
+It seems republicans are more spread on fiscal issues, as the tea party republicans are on the bottom left.
+
+There also seems to be a trend in republicans where those who are more fiscally lenient are also more likely to vote pro-choice.
+
+
