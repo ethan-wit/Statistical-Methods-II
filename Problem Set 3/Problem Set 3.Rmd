@@ -1,0 +1,206 @@
+---
+title: "Problem Set 3"
+author: "Ethan Witkowski"
+date: "Spring 2019"
+output: 
+  github_document:
+    html_preview: true
+    pandoc_args: --webtex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<br>
+<br>
+
+#### 1)
+
+```{r, echo=FALSE}
+skewed_dist <- data.frame("X" = c(1,1,1,2,2,2,3,3,3,3,4,4,4,4,5,5,5),
+                          "Y" = c(1,2,3,2,3,4,3,4,5,6,6,9,11,12,6,8,9))
+
+plot(skewed_dist)
+
+```
+
+The distribution of Y at X=4 does not represent a normal distribution. Because normality is assumed for all conditional distributions of x values, the skewed distribution at x=4 violates this assumption. Due to this violation, the least-squares line does not pass through the conditional mean at this x value.
+<br>
+<br>
+
+#### 2)
+
+No, this is not the correct interpretation; this interpretation assumes causality between weight and height, which cannot be inferred with regression analysis. It means that if an individual is 10 pounds heavier than another individual, the model predicts they will also be .47 inches taller.
+<br>
+<br>
+
+#### 3)
+
+```{r}
+
+meanheight <- 62.4 + (.047) * (200)
+meanheight
+
+SD <- 2.2
+
+targetheight <- 74
+
+heightdiff <- targetheight - meanheight
+heightdiff
+
+SDsaway <- heightdiff/SD
+SDsaway
+
+PercentageAbove <- 1 - pnorm(SDsaway)
+PercentageAbove
+```
+
+The percentage of all 200-pound men above 74 inches is 0.159%.
+<br>
+<br>
+
+#### 4)
+
+C must be true. This is because the marginal SD for both Y1 and Y2 are the same, while the conditional SD for Y2 is smaller than the conditional SD for Y1. This means that there is a larger decrease in error due to the introduction of X2 when predicting Y2 than the decrease in error due to the introduction of X1 when predicting Y1. This results in the correlation between X2 and Y2 being larger than the correlation between X1 and Y1.
+<br>
+<br>
+
+#### 5)
+
+This is not the correct regression line. This is because at the lower bound of the x axis there are more points above than the line than below, and at the higher bound of the x axis there are more points below the line than above. The true regression line would have a flatter slope and start higher on the y axis.
+<br>
+<br>
+
+#### 6a)
+
+```{r}
+data <- read.csv("C:/Users/ethan/Desktop/Swarthmore/Spring 2019/Statistics II/Problem Sets/Problem Set 3/skyscrapers.csv")
+
+height <- data[,"height"]
+stories <- data[,"stories"]
+year <- data[,"year"]
+building <- data[,"building"]
+
+plot(stories, height)
+```
+
+There appears to be a strong, linear relationship.
+<br>
+<br>
+
+#### 6b)
+
+```{r}
+correlation <- cor(stories, height)
+correlation
+```
+
+There is a strong correlation between the variables.
+<br>
+<br>
+
+#### 6c)
+
+```{r}
+fit1 <- lm(height ~ stories)
+summary(fit1)
+```
+Regression Model:
+
+Building Height = 65.16 + (12.09)Number of Stories
+<br>
+
+Conditional Standard Deviation:
+```{r}
+ConditionalSD <- 80.05/(63-2)
+ConditionalSD
+```
+<br>
+R-squared = .9134
+<br>
+<br>
+
+#### 6d)
+
+```{r}
+t <- qt(.025, 61)
+t
+
+ConfidenceIntervalbound <- 12.0979 - ((t)*(.4695))
+ConfidenceIntervalboundtwo <- 12.0979 + ((t)*(.4695))
+
+ConfidenceIntervalbound
+ConfidenceIntervalboundtwo
+```
+<br>
+<br>
+
+#### 6e)
+
+$H_0: B_{1} = 0$
+
+$H_a: B_{1} \neq 0$
+
+
+```{r}
+tstat <- 12.0979/.4695
+tstat
+
+pvalue <- 2*pt(-tstat,61)
+pvalue
+```
+
+The conclusion is expected, as the confidence interval for $\beta_1$ does not include zero.
+<br>
+<br>
+
+#### 6f)
+
+```{r}
+plot(fitted(fit1), resid(fit1))
+abline(h=0)
+```
+
+There are no clear violations, however, there is some concern with the downward trend from 400-600.
+<br>
+<br>
+
+#### 6g)
+
+```{r}
+qqnorm(resid(fit1))
+qqline(resid(fit1))
+```
+
+Yes, there is a violation of the assumption that the conditional distribution for Y is normal for any given X. The QQplot represents a t-distribution.
+<br>
+<br>
+
+#### 6h)
+
+```{r}
+plot(year, resid(fit1))
+plot(year, stories)
+```
+
+There appears to be a gap between 1936 and 1960 where no buildings are built (in this dataset). This makes sense as much of the world was involved in World War 2 from 1939-1945, where all the raw materials such as steel and concrete were used to make armaments and military outposts. 
+
+The amount of buildings also increases post 1965. This makes sense as the rise of multinational, large corporations occurred around 1965, and these corporations had the capital to invest in building.
+
+Their appears to be an increase in the variance of height/story ratio across time. This may be due to a diversification of building architecture styles across time.
+<br>
+<br>
+
+#### 6i)
+
+```{r}
+plot(year, resid(fit1))
+abline(h=0)
+identify(year, resid(fit1), labels=building, cex=.6)
+```
+
+Yes, the Transamerica Pyramid, 2 Liberty Place, and the Petronas Towers have unusally high heights for their number of stories. 
+
+It was ruled that antennas on top of skyscrapers do not add to the height of the building.
+
+All three of these building have a tapered top, which allow for extra height, without the addition of extra stories.
